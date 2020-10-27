@@ -1,4 +1,4 @@
-# Petrol Station Dashboard Recruitment Task
+# New Account Recruitment Task
 
 Checkout live app: [Petrol Station Dashboard](https://new-account-recruitment-task.igordyniewski.vercel.app/)
 
