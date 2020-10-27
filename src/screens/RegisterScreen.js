@@ -17,6 +17,7 @@ const Main = styled.div`
     position: relative;
     overflow-y: scroll;
     box-sizing: border-box;
+    overflow-x: hidden;
 `
 const Gradient = styled.div`
     width: 800px;
