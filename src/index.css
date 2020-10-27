@@ -12,6 +12,9 @@ body {
   color: white;
   font-family: 'Roboto', sans-serif;
 }
+    ::-webkit-scrollbar {
+      z-index: 10;
+    }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',

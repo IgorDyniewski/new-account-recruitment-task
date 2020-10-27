@@ -27,6 +27,7 @@ const inputStyles = `
 `
 const Input = styled.input`
     ${inputStyles}
+    color: ${(props) => (props.isError ? '#EB5757' : '#333333')};
 `
 const PlaceHolderText = styled.span`
     position: absolute;
@@ -38,13 +39,13 @@ const PlaceHolderText = styled.span`
     margin-left: 10px;
     transform: ${(props) => (props.isActive ? 'translateY(-30px)' : 'translateY(0px)')};
     transition: transform 100ms ease-in, font-size 100ms ease-in;
-    color: #333333;
+    color: ${(props) => (props.isError ? '#EB5757' : '#333333')};
     pointer-events: none;
 `
 const MainBottomStripe = styled.div`
     width: 100%;
     height: 2px;
-    background-color: #dadaed;
+    background-color: ${(props) => (props.isError ? '#EB5757' : '#dadaed')};
     position: absolute;
     bottom: 0px;
     left: 0px;
@@ -57,6 +58,22 @@ const ActiveBottomStripe = styled.div`
     position: absolute;
     bottom: 0px;
     left: 0px;
+`
+const ErrorText = styled.span`
+    position: absolute;
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 11px;
+    line-height: 28px;
+    margin-left: 10px;
+    transition: transform 100ms ease-in, opacity 100ms ease-in;
+    transform: ${(props) => (props.isError ? 'translateY(0px)' : 'translateY(-12px)')};
+    color: #eb5757;
+    pointer-events: none;
+    bottom: -27px;
+    opacity: ${(props) => (props.isError ? 1 : 0)};
+    min-width: 200px;
 `
 
 export const InputComponent = (props) => {
@@ -72,9 +89,10 @@ export const InputComponent = (props) => {
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 style={{}}
+                isError={props.isError}
             />
-
-            <MainBottomStripe />
+            <ErrorText isError={props.isError}>Invalid data</ErrorText>
+            <MainBottomStripe isError={props.isError} />
             <ActiveBottomStripe isActive={isFocused} />
         </InputMainWrapper>
     )
@@ -93,14 +111,22 @@ const Select = styled.select`
     background-position-x: 100%;
     background-position-y: 50%;
 `
+const SelectMainWrapper = styled(InputMainWrapper)`
+    @media (max-width: ${(props) => props.mobileMaxScreenWidth}px) {
+        display: ${(props) => (props.onlyOnMobile ? 'block' : 'none')};
+    }
+    @media (min-width: ${(props) => props.mobileMaxScreenWidth}px) {
+        display: ${(props) => (props.onlyOnDesktop ? 'block' : 'none')};
+    }
+`
 export const SelectComponent = (props) => {
     // States
     const [isFocused, setIsFocused] = useState(false)
 
     return (
-        <InputMainWrapper style={props.style}>
+        <SelectMainWrapper {...props} style={props.style}>
             <PlaceHolderText isActive={true}>{props.label}</PlaceHolderText>
-            <Select onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)}>
+            <Select {...props} style={null} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)}>
                 {props.children}
             </Select>
             {!props.noBottomStripe && (
@@ -109,6 +135,9 @@ export const SelectComponent = (props) => {
                     <ActiveBottomStripe isActive={isFocused} />
                 </>
             )}
-        </InputMainWrapper>
+            <ErrorText isError={props.isError}>
+                {props.customErrorMessage ? props.customErrorMessage : 'Invalid data'}
+            </ErrorText>
+        </SelectMainWrapper>
     )
 }

@@ -16,7 +16,6 @@ const Main = styled.div`
     background-color: #242424;
     position: relative;
     overflow-y: scroll;
-
     box-sizing: border-box;
 `
 const Gradient = styled.div`
@@ -112,14 +111,20 @@ const RegisterForm = styled.form`
     position: relative;
     @media (max-width: 991px) {
         width: 100%;
-        padding: 85px;
+        padding: 65px;
+        padding-bottom: calc(65px + 25px);
     }
     @media (max-width: 550px) {
-        padding: 65px;
+        padding: 45px;
+        padding-bottom: calc(45px + 25px);
     }
     @media (max-width: 410px) {
         padding: 35px;
-        padding-bottom: 50px;
+        padding-bottom: calc(35px + 25px);
+    }
+    @media (max-width: 350px) {
+        padding: 20px;
+        padding-bottom: calc(20px + 25px);
     }
 `
 const WhiteBackground = styled.div`
@@ -175,7 +180,7 @@ const GreenLine = styled.div`
         left: 60px;
     }
     @media (max-width: 550px) {
-        left: 40px;
+        left: 30px;
     }
     @media (max-width: 410px) {
         left: 20px;
@@ -204,10 +209,10 @@ const RowSideIndicatorsMain = styled.div`
     flex-direction: column;
 `
 const RowSideIndicatorLine = styled.div`
-    height: 4px;
+    height: 2px;
     width: 35px;
     margin-left: -10px;
-    background-color: #1bfec0;
+    background-color: ${(props) => (props.isActive ? '#1bfec0' : 'rgba(255,255,255,0.25)')};
 `
 const RowSideIndicatorText = styled.span`
     margin-top: 5px;
@@ -231,11 +236,21 @@ const ChessSelectWrapper = styled.div`
     align-items: center;
 `
 const BirthDateSeparator = styled.div`
-    width: 10px;
+    min-width: 10px;
     height: 2px;
     background-color: #dadaed;
     margin-left: 10px;
     margin-right: 10px;
+`
+const ContinueButtonArrowWrapper = styled.div`
+    width: 50px;
+    height: 50px;
+    background-color: #7841f4;
+    background-image: url('/arrow.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 35%;
+    transition: transform 200ms ease;
 `
 const ContinueButtonMain = styled.button`
     z-index: 3;
@@ -253,6 +268,9 @@ const ContinueButtonMain = styled.button`
     padding: 0px;
     display: flex;
     cursor: pointer;
+    :focus {
+        outline: none;
+    }
 
     position: absolute;
     bottom: -25px;
@@ -262,26 +280,22 @@ const ContinueButtonMain = styled.button`
         left: calc(50% - 120px);
         bottom: -25px;
     }
+    transition: transform 200ms ease;
+    :hover {
+        transform: translateX(20px);
+    }
+    &:hover ${ContinueButtonArrowWrapper} {
+        transform: scale(1.2);
+    }
 `
 const ContinueButtonGradient = styled.div`
-    width: 240px;
-    height: 100%;
     border: none;
     background: linear-gradient(90deg, #8658eb -0.42%, #652ae6 100.42%);
-    height: 100%;
+    height: 50px;
     width: 190px;
     display: flex;
     justify-content: center;
     align-items: center;
-`
-const ContinueButtonArrowWrapper = styled.div`
-    width: 50px;
-    height: 50px;
-    background-color: #7841f4;
-    background-image: url('/arrow.svg');
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 35%;
 `
 
 const RegisterScreen = () => {
@@ -292,7 +306,12 @@ const RegisterScreen = () => {
     const [canPlayChess, setCanPlayChess] = useState(false)
     const [birthDay, setBirthDay] = useState(1)
     const [birthMonth, setBirthMonth] = useState(1)
-    const [birthYear, setBirthYear] = useState(1920)
+    const [birthYear, setBirthYear] = useState(new Date().getFullYear())
+
+    // Errors
+    const [nameError, setNameError] = useState(false)
+    const [phoneNumberError, setPhoneNumberError] = useState(false)
+    const [isUnder18, setIsUnder18] = useState(false)
 
     // Preparing phone codes
     let phoneCodesArr = []
@@ -300,11 +319,44 @@ const RegisterScreen = () => {
 
     // Preparing 31 days
     let availableDays = []
-    for (let i = 1; i < 32; i++) availableDays.push(<option>{i}</option>)
+    for (let i = 1; i < 32; i++) availableDays.push(<option key={i}> {String(i).length === 1 ? `0${i}` : i}</option>)
 
     // Preparing Years
     let availableYears = []
-    for (let i = 1920; i <= new Date().getFullYear(); i++) availableYears.push(<option>{i}</option>)
+    for (let i = 1920; i <= new Date().getFullYear(); i++) availableYears.push(<option key={i}>{i}</option>)
+
+    // On form submit
+    const _onFormSubmit = (e) => {
+        e.preventDefault()
+
+        // Test logic
+        let isFromValid = true
+        if (fullName.length < 3) {
+            isFromValid = false
+            setNameError(true)
+        }
+
+        // Phone number test
+        if (phoneNumber.replace(/\D/g, '').length !== 9 || phoneNumber.replace(/[\d\s]/g, '').length > 0) {
+            setPhoneNumberError(true)
+            isFromValid = false
+        }
+
+        // BirthDateCheck
+        let userBirthDate = new Date()
+        let dateNow = new Date()
+        userBirthDate.setFullYear(birthYear)
+        userBirthDate.setMonth(birthMonth - 1)
+        userBirthDate.setDate(birthDay)
+        userBirthDate.setHours(0, 0, 0, 0)
+
+        if (new Date(dateNow - userBirthDate).getFullYear() - 1970 < 18) {
+            isFromValid = false
+            setIsUnder18(true)
+        }
+
+        if (isFromValid) console.log('Success')
+    }
 
     return (
         <>
@@ -318,7 +370,7 @@ const RegisterScreen = () => {
                                 <FarLeftGraphicLines />
                             </FarLeftGraphicTintWithLines>
                         </FarLeftGraphic>
-                        <RegisterForm>
+                        <RegisterForm onSubmit={(e) => _onFormSubmit(e)}>
                             <GreenLine />
                             <WhiteBackground />
                             <Row>
@@ -339,13 +391,17 @@ const RegisterScreen = () => {
                                 <RowMain>
                                     <InputComponent
                                         value={fullName}
-                                        onChange={(e) => setFullName(e.target.value)}
+                                        onChange={(e) => {
+                                            setNameError(false)
+                                            setFullName(e.target.value)
+                                        }}
                                         placeholder={'Your name'}
+                                        isError={nameError}
                                     />
                                 </RowMain>
                                 <RowSideIndicatorsWrapper>
                                     <RowSideIndicatorsMain>
-                                        <RowSideIndicatorLine />
+                                        <RowSideIndicatorLine isActive={true} />
                                         <RowSideIndicatorText>02</RowSideIndicatorText>
                                         <RowSideIndicatorText>Personal</RowSideIndicatorText>
                                     </RowSideIndicatorsMain>
@@ -357,13 +413,11 @@ const RegisterScreen = () => {
                                         <SelectComponent
                                             value={phonePrefix}
                                             onChange={(e) => setPhonePrefix(e.target.value)}
-                                            default={'PL'}
                                             label={'Mobile'}
                                             style={{ width: '180px' }}
                                         >
                                             {phoneCodesArr.map((phoneCodeObj, index) => (
                                                 <option
-                                                    selected={phoneCodeObj.countryCode === 'PL' ? true : false}
                                                     value={phoneCodeObj.countryCode}
                                                     key={index}
                                                 >{`+${phoneCodeObj.prefix} (${phoneCodeObj.countryCode})`}</option>
@@ -371,8 +425,12 @@ const RegisterScreen = () => {
                                         </SelectComponent>
                                         <InputComponent
                                             value={phoneNumber}
-                                            onChange={(e) => setPhoneNumber(e.target.value)}
+                                            onChange={(e) => {
+                                                setPhoneNumber(e.target.value)
+                                                setPhoneNumberError(false)
+                                            }}
                                             style={{ marginLeft: '20px' }}
+                                            isError={phoneNumberError}
                                         />
                                     </PhoneNumberRow>
                                 </RowMain>
@@ -380,7 +438,6 @@ const RegisterScreen = () => {
                                     <RowSideIndicatorsMain>
                                         <RowSideIndicatorLine />
                                         <RowSideIndicatorText>03</RowSideIndicatorText>
-                                        <RowSideIndicatorText>Additional data</RowSideIndicatorText>
                                     </RowSideIndicatorsMain>
                                 </RowSideIndicatorsWrapper>
                             </Row>
@@ -405,22 +462,33 @@ const RegisterScreen = () => {
                                         <SelectComponent
                                             noBottomStripe
                                             value={birthDay}
-                                            onChange={(e) => setBirthDay(e.target.value)}
+                                            onChange={(e) => {
+                                                setIsUnder18(false)
+                                                setBirthDay(e.target.value)
+                                            }}
                                             default={1}
                                             label={''}
-                                            style={{ width: '60px', border: '2px solid #dadaed' }}
+                                            style={{ minWidth: '50px', maxWidth: '50px', border: '2px solid #dadaed' }}
+                                            isError={isUnder18}
+                                            customErrorMessage={'You must be over 18 to register'}
                                         >
                                             {availableDays}
                                         </SelectComponent>
                                         <BirthDateSeparator />
+
                                         {/* Month */}
                                         <SelectComponent
+                                            onlyOnDesktop
+                                            mobileMaxScreenWidth={600}
                                             noBottomStripe
                                             value={birthMonth}
-                                            onChange={(e) => setBirthMonth(e.target.value)}
+                                            onChange={(e) => {
+                                                setBirthMonth(e.target.value)
+                                                setIsUnder18(false)
+                                            }}
                                             default={1}
                                             label={''}
-                                            style={{ width: '180px', border: '2px solid #dadaed' }}
+                                            style={{ border: '2px solid #dadaed' }}
                                         >
                                             {months.map((month, index) => (
                                                 <option value={index + 1} key={index}>
@@ -428,23 +496,46 @@ const RegisterScreen = () => {
                                                 </option>
                                             ))}
                                         </SelectComponent>
+
+                                        <SelectComponent
+                                            onlyOnMobile
+                                            mobileMaxScreenWidth={600}
+                                            noBottomStripe
+                                            value={birthMonth}
+                                            onChange={(e) => {
+                                                setBirthMonth(e.target.value)
+                                                setIsUnder18(false)
+                                            }}
+                                            default={1}
+                                            label={''}
+                                            style={{ border: '2px solid #dadaed' }}
+                                        >
+                                            {months.map((month, index) => (
+                                                <option value={index + 1} key={index}>
+                                                    {String(index + 1).length === 1 ? `0${index + 1}` : index + 1}
+                                                </option>
+                                            ))}
+                                        </SelectComponent>
+
                                         <BirthDateSeparator />
 
                                         {/* Year */}
                                         <SelectComponent
                                             noBottomStripe
                                             value={birthYear}
-                                            onChange={(e) => setBirthYear(e.target.value)}
-                                            default={2020}
+                                            onChange={(e) => {
+                                                setIsUnder18(false)
+                                                setBirthYear(e.target.value)
+                                            }}
                                             label={''}
-                                            style={{ width: '180px', border: '2px solid #dadaed' }}
+                                            style={{ border: '2px solid #dadaed' }}
                                         >
                                             {availableYears}
                                         </SelectComponent>
                                     </PhoneNumberRow>
                                 </RowMain>
                             </Row>
-                            <ContinueButtonMain>
+                            <ContinueButtonMain type="submit">
                                 <ContinueButtonGradient>CONTINUE</ContinueButtonGradient>
                                 <ContinueButtonArrowWrapper />
                             </ContinueButtonMain>
