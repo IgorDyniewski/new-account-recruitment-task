@@ -1,6 +1,6 @@
 # New Account Recruitment Task
 
-Checkout live app: [Petrol Station Dashboard](https://new-account-recruitment-task.igordyniewski.vercel.app/)
+Checkout live app: [New Account Recruitment Task](https://new-account-recruitment-task.igordyniewski.vercel.app/)
 
 ![App Screenshot](https://new-account-recruitment-task.igordyniewski.vercel.app/github-screenshot.png)
 
